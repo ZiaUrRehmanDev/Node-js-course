@@ -1,0 +1,15 @@
+nodemon for server
+express for apis
+body-parser for data
+express-from-data  data
+joi for validation 
+mongoose  for database 
+
+
+create mongoosedb project 
+and connect with compass
+
+
+
+username : mongodbapis
+password : mongodbapis
