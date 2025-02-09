@@ -1,6 +1,7 @@
 const Joi = require('joi');
 
 const userValidate = Joi.object({
+  
     name: Joi.string().trim().required().min(8).max(255).messages({
         'string.base': `Name must be a string`,
         'string.empty': `Name cannot be empty`,
@@ -8,12 +9,14 @@ const userValidate = Joi.object({
         'string.max': `Name should have a maximum length of {#limit}`,
         'any.required': `Name is required`,
       }),
+
     email: Joi.string().trim().required().email().messages({
         'string.base': `Email must be a string`,
         'string.empty': `Email cannot be empty`,
         'string.email': `Email must be a valid email address`,
         'any.required': `Email is required`,
       }),
+
       password: Joi.string()
       .min(8)
       .max(30)
@@ -26,6 +29,13 @@ const userValidate = Joi.object({
         'string.max': `Password should have a maximum length of {#limit}`,
         'string.pattern.base': `Password must include at least one uppercase letter, one lowercase letter, one number, and one special character`,
         'any.required': `Password is required`,
+      }),
+
+      userType: Joi.string().valid("admin", "user").required().messages({
+        'string.base': `userType must be a string`,
+        'string.empty': `Name cannot be empty`,
+        'string.valid': `Type only Admin or User`,
+        'any.required': `userType is required`,
       }),
 })
 
