@@ -1,20 +1,12 @@
 
 const userValidate = require('../validation/UserValidation')
 const userModel = require('../Model/authModels')
+const profileModel = require('../Model/profileModel')
 const jWT = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const nodemailer = require("nodemailer")
 require('dotenv').config()
-
-
-
-
-
 const secret_key = process.env.secret_key
-
-
-
-
 
 exports.CreateUser = async (req, res) => {
     try {
@@ -63,13 +55,12 @@ exports.CreateUser = async (req, res) => {
                 tls: {
                     rejectUnauthorized: false
                 }
-
             })
 
             const info = {
                 from : process.env.smtpemail,
                 to : email,
-                subject : "Welcome to Aptech MAIL SERVICE",
+                subject : "Welcome oto test MAIL SERVICE",
                 html :  `
                 <h1>Verify Account</h1>
                 <p>your otp is : ${otp}</p>   
@@ -178,74 +169,82 @@ try{
 
 
 
+
+
+
 exports.completeProfile = async (req, res) => {
     const { body, headers } = req
     const { authorization } = headers
-    try {
+    // try {
 
-        if (!authorization) {
-            return res.status(401).json({
-                message: "token not provide"
-            })
-        }
+    if (!authorization) return res.status(403).send('Access Denied');
 
-        jWT.verify(authorization, secret_key, async (err, decode) => {
-            if (err) {
-                return res.status(401).json({
-                    message: "unauthorization"
-                })
-            }
-            else {
-                console.log(decode)
-                req.userId = decode.user_id
+    console.log(req.file.path)
+        res.send(body)
 
-                var user = await  authModel.findById(req.userId)
+    //     if (!authorization) {
+    //         return res.status(401).json({
+    //             message: "token not provide"
+    //         })
+    //     }
 
-                if(user.completeProfile==false){
-                      await profileValidate.validateAsync(req.body)
+    //     jWT.verify(authorization, secret_key, async (err, decode) => {
+    //         if (err) {
+    //             return res.status(401).json({
+    //                 message: "unauthorization"
+    //             })
+    //         }
+    //         else {
+    //             console.log(decode)
+    //             req.userId = decode.user_id
 
-                var obj = {
-                    gender: req.body.gender,
-                    contactNo: req.body.contactNo,
-                    address: req.body.address,
-                    Image: req.file.path,
-                    authId:req.userId
-                }
+    //             var user = await  userModel.findById(req.userId)
 
-                var userProfile = profileModel(obj)
-                await userProfile.save()
-                console.log(userProfile)
+    //             if(user.completeProfile==false){
+    //                   await profileValidate.validateAsync(req.body)
 
-                await  authModel.findByIdAndUpdate(req.userId,{
-                    completeProfile :true,
-                    // profileId:
+    //             var obj = {
+    //                 gender: req.body.gender,
+    //                 contactNo: req.body.contactNo,
+    //                 address: req.body.address,
+    //                 Image: req.file.path,
+    //                 authId:req.userId
+    //             }
 
-                })
-                return res.status(200).json({
-                    message: "profile update",
-                    // data: obj
+    //             var userProfile = profileModel(obj)
+    //             await userProfile.save()
+    //             console.log(userProfile)
 
-                })
-                }
-                else{
-                    return res.status(200).json({
-                        message: "already complete profile",
-                        // data: obj
+    //             await  authModel.findByIdAndUpdate(req.userId,{
+    //                 completeProfile :true,
+    //                 // profileId:
+
+    //             })
+    //             return res.status(200).json({
+    //                 message: "profile update",
+    //                 // data: obj
+
+    //             })
+    //             }
+    //             else{
+    //                 return res.status(200).json({
+    //                     message: "already complete profile",
+    //                     // data: obj
     
-                    })
-                }
+    //                 })
+    //             }
 
               
-            }
+    //         }
 
-        })
-    }
-    catch (e) {
-        return res.status(500).json({
-            message: "error",
-            e
-        })
-    }
+    //     })
+    // }
+    // catch (e) {
+    //     return res.status(500).json({
+    //         message: "error",
+    //         e
+    //     })
+    // }
 
     // return res.status(200).json({
     //     message:"upoads"

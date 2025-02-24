@@ -23,11 +23,13 @@ db.on('disconnected',()=>{
 
 
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
+
+app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.urlencoded({ extended: true }))
 
 // parse application/json
 app.use(bodyParser.json())
-app.use(formData.parse())
+//app.use(formData.parse())
 
 app.use(mainRouter)
 
