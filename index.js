@@ -21,6 +21,9 @@ db.on('disconnected',()=>{
     console.log('connected mongoose')
 })
 
+app.get('/',(req,res)=>{
+    res.send({'message':'runsdfasdfasdfsdf'})
+})
 
 // parse application/x-www-form-urlencoded
 
