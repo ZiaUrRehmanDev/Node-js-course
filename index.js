@@ -9,6 +9,7 @@ const port= 3000
 
 const dbUrl=process.env.connectionDB
 mongoose.connect(dbUrl)
+app.use("/uploads", exp.static("uploads"));
 
 const db=mongoose.connection
 db.on('error',(err)=>{
