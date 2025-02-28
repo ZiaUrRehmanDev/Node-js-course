@@ -66,5 +66,12 @@ router.post("/posts", middleWare.verifyToken, upload.single("image"),userPost.us
   // ** Get All Posts (Protected Route) **
 router.get("/posts", middleWare.verifyToken,userPost.getPost );
 
+router.get("/my-posts", middleWare.verifyToken,userPost.getCurrnetUserPost );
+
+router.put("/my-posts/:id", middleWare.verifyToken, userPost.updatePost);
+router.delete("/my-posts/:id", middleWare.verifyToken, userPost.deletePost);
+
+
+
 
 module.exports=router

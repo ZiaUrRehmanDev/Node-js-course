@@ -36,3 +36,54 @@ exports.userPost= async (req, res) => {
       res.status(500).json({ error: "Internal Server Error", details: error });
     }
   }
+
+
+  exports.getCurrnetUserPost= async (req, res) => {
+    try {
+     const posts = await PostModel.find({ userId: req.user.id }).populate("userId", "name email").sort({ createdAt: -1 });
+      res.json(posts );
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error", details: error });
+    }
+  }
+
+
+
+
+  exports.updatePost = async (req, res) => {
+    try {
+      const post = await PostModel.findOne({ _id: req.params.id, userId: req.user.id });
+  
+      if (!post) {
+        return res.status(404).json({ error: "Post not found or unauthorized" });
+      }
+  
+      // Update fields if provided
+      post.title = req.body.title || post.title;
+      post.description = req.body.description || post.description;
+      post.image = req.body.image || post.image;
+  
+      await post.save();
+      res.json({ message: "Post updated successfully", post });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error", details: error });
+    }
+  };
+  
+
+
+
+  exports.deletePost = async (req, res) => {
+    try {
+      const post = await PostModel.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+  
+      if (!post) {
+        return res.status(404).json({ error: "Post not found or unauthorized" });
+      }
+  
+      res.json({ message: "Post deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error", details: error });
+    }
+  };
+  
