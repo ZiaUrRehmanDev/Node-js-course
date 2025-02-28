@@ -22,6 +22,10 @@ const authSchema  =new  mongoose.Schema({
         type:Boolean,
         default : false
     },
+    completeProfile :{
+        type:Boolean,
+        default : false
+    },
     otp : {
         type:Number,
         required:true

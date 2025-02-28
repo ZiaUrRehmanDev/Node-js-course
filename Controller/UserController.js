@@ -5,6 +5,7 @@ const profileModel = require('../Model/profileModel')
 const jWT = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const nodemailer = require("nodemailer")
+const profileValidate = require("../validation/profileValidator");
 require('dotenv').config()
 const secret_key = process.env.secret_key
 
@@ -23,12 +24,12 @@ exports.CreateUser = async (req, res) => {
             })
         } else {
             let otp = Math.floor(Math.random() * 900000)
-            if(otp.length!=6){
+            if (otp.length != 6) {
                 otp = Math.floor(Math.random() * 900000)
                 req.body.otp = otp
 
-            }else{
-                
+            } else {
+
                 req.body.otp = otp
 
             }
@@ -43,13 +44,13 @@ exports.CreateUser = async (req, res) => {
             console.log('user', secret_key)
             const token = jWT.sign({ user_id: user._id }, secret_key, { expiresIn: "2h" })
 
- 
+
 
             // node mailer
             const transporter = nodemailer.createTransport({
-                service : "gmail",
-                auth :{
-                    user : process.env.smtpemail,
+                service: "gmail",
+                auth: {
+                    user: process.env.smtpemail,
                     pass: process.env.smtppasskey,
                 },
                 tls: {
@@ -58,25 +59,25 @@ exports.CreateUser = async (req, res) => {
             })
 
             const info = {
-                from : process.env.smtpemail,
-                to : email,
-                subject : "Welcome oto test MAIL SERVICE",
-                html :  `
+                from: process.env.smtpemail,
+                to: email,
+                subject: "Welcome oto test MAIL SERVICE",
+                html: `
                 <h1>Verify Account</h1>
                 <p>your otp is : ${otp}</p>   
                 `
 
             }
 
-            transporter.sendMail(info,(err,result)=>{
-                if(err){
+            transporter.sendMail(info, (err, result) => {
+                if (err) {
                     console.log(err)
                 }
-                else{
+                else {
 
                 }
             })
-          
+
 
             return res.status(201).json({
                 message: "User Crteated ",
@@ -101,68 +102,69 @@ exports.CreateUser = async (req, res) => {
 
 
 exports.verifyotp = async (req, res) => {
-try{
-    
-    const { body, headers } = req
-    const { authorization } = headers
-    const { otp } = body
-    if (!authorization) {
-        return res.status(401).json({
-            message: "token not provide"
-        })
-    } else {
-        if (otp == undefined) {
-            return res.status(401).json(
-                {
-                    message: "otp not provide"
-                }
-            )
-        } else if (otp.length != 6) {
+    try {
+
+        const { body, headers } = req
+        const { authorization } = headers
+        const { otp } = body
+
+        if (!authorization) {
             return res.status(401).json({
-                message: "Otp must be 6 letter"
+                message: "token not provide"
             })
         } else {
-            jWT.verify(authorization, secret_key, async (err, decode) => {
-                if (err) {
-                    return res.status(401).json({
-                        message: "unauthorization"
-                    })
-                }
-                console.log(decode)
-                req.userid = decode.user_id
-                var userFind = await userModel.findById(req.userid)
-                if(!userFind){
-                    return res.status(404).json({ message: "User not found" });
-                }
-                const token = jWT.sign({ user_id: req.userid }, secret_key, { expiresIn: "2h" })
-                console.log(userFind)
-                if (userFind.otp == otp) {
-                    await userFind.updateOne({
-                        isVerify: true
-                    })
-                    return res.status(200).json({
-                        message: "verify otp ",
-                        token
-                    })
-                }
-                else {
-                    return res.status(401).json({
-                        message: "invalid otp",
-                    
-                    })
-                }
+            if (otp == undefined) {
+                return res.status(401).json(
+                    {
+                        message: "otp not provide"
+                    }
+                )
+            } else if (otp.length != 6) {
+                return res.status(401).json({
+                    message: "Otp must be 6 letter"
+                })
+            } else {
+                jWT.verify(authorization, secret_key, async (err, decode) => {
+                    if (err) {
+                        return res.status(401).json({
+                            message: "unauthorization"
+                        })
+                    }
+                    console.log(decode)
+                    req.userid = decode.user_id
+                    var userFind = await userModel.findById(req.userid)
+                    if (!userFind) {
+                        return res.status(404).json({ message: "User not found" });
+                    }
+                    const token = jWT.sign({ user_id: req.userid }, secret_key, { expiresIn: "2h" })
+                    console.log(userFind)
+                    if (userFind.otp == otp) {
+                        await userFind.updateOne({
+                            isVerify: true
+                        })
+                        return res.status(200).json({
+                            message: "verify otp ",
+                            token
+                        })
+                    }
+                    else {
+                        return res.status(401).json({
+                            message: "invalid otp",
 
-            })
+                        })
+                    }
+
+                })
+            }
         }
-    }
-}catch(e){
-    return res.status(500).json({
-        message :"internal server error",
-        error: e
+    } catch (e) {
+        return res.status(500).json({
+            message: "internal server error",
+            error: e
 
-    })
-}
-  // res.send({otp:'verify otp'});
+        })
+    }
+    // res.send({otp:'verify otp'});
 }
 
 
@@ -175,79 +177,95 @@ try{
 exports.completeProfile = async (req, res) => {
     const { body, headers } = req
     const { authorization } = headers
-    // try {
+    try {
 
-    if (!authorization) return res.status(403).send('Access Denied');
+        if (!authorization) return res.status(403).send('Access Denied');
 
-    console.log(req.file.path)
-        res.send(body)
+        console.log(req.file.path)
 
-    //     if (!authorization) {
-    //         return res.status(401).json({
-    //             message: "token not provide"
-    //         })
-    //     }
 
-    //     jWT.verify(authorization, secret_key, async (err, decode) => {
-    //         if (err) {
-    //             return res.status(401).json({
-    //                 message: "unauthorization"
-    //             })
-    //         }
-    //         else {
-    //             console.log(decode)
-    //             req.userId = decode.user_id
+        if (!authorization) {
+            return res.status(401).json({
+                message: "token not provide"
+            })
+        }
 
-    //             var user = await  userModel.findById(req.userId)
+        jWT.verify(authorization, secret_key, async (err, decode) => {
+            if (err) {
+                return res.status(401).json({
+                    message: "unauthorization"
+                })
+            }
+            else {
+                console.log(decode)
+                req.userId = decode.user_id
 
-    //             if(user.completeProfile==false){
-    //                   await profileValidate.validateAsync(req.body)
+                var user = await userModel.findById(req.userId)
+                console.log(user)
+                console.log(user)
 
-    //             var obj = {
-    //                 gender: req.body.gender,
-    //                 contactNo: req.body.contactNo,
-    //                 address: req.body.address,
-    //                 Image: req.file.path,
-    //                 authId:req.userId
-    //             }
 
-    //             var userProfile = profileModel(obj)
-    //             await userProfile.save()
-    //             console.log(userProfile)
+                if (user.completeProfile == false) {
+                      await profileValidate.validateAsync(req.body)
+                    var obj = {
+                        gender: req.body.gender,
+                        contactNo: req.body.contactNo,
+                        address: req.body.address,
+                        Image: req.file.path,
+                        authId: req.userId
+                    }
 
-    //             await  authModel.findByIdAndUpdate(req.userId,{
-    //                 completeProfile :true,
-    //                 // profileId:
+                    var userProfile = profileModel(obj)
+                    await userProfile.save()
+                    console.log(userProfile)
 
-    //             })
-    //             return res.status(200).json({
-    //                 message: "profile update",
-    //                 // data: obj
+                    await userModel.findByIdAndUpdate(req.userId, {
+                        completeProfile: true,
+                        // profileId:
 
-    //             })
-    //             }
-    //             else{
-    //                 return res.status(200).json({
-    //                     message: "already complete profile",
-    //                     // data: obj
-    
-    //                 })
-    //             }
+                    })
+                    return res.status(200).json({
+                        message: "profile update",
+                        // data: obj
 
-              
-    //         }
+                    })
+                }
+                else {
+                    return res.status(200).json({
+                        message: "already complete profile",
+                        // data: obj
 
-    //     })
-    // }
-    // catch (e) {
-    //     return res.status(500).json({
-    //         message: "error",
-    //         e
-    //     })
-    // }
+                    })
+                }
 
-    // return res.status(200).json({
-    //     message:"upoads"
-    // })
+
+            }
+
+        })
+    }
+    catch (e) {
+        return res.status(500).json({
+            message: "error",
+            e
+        })
+    }
 
 }
+
+
+
+exports.LoginUser= async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const user = await userModel.findOne({ email });
+  
+      if (!user || !(await bcrypt.compare(password, user.password))) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+  
+     const token = jWT.sign({ id: user._id}, secret_key, { expiresIn: "1h" });
+      res.json({ message: "Login successful",token });
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error", details: error });
+    }
+  }
